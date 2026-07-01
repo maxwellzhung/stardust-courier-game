@@ -1,0 +1,84 @@
+<view class="page">
+  <canvas
+    type="2d"
+    id="gameCanvas"
+    class="game-canvas"
+    bindtouchstart="onTouchStart"
+    bindtouchmove="onTouchMove"
+    bindtouchend="onTouchEnd"
+    bindtouchcancel="onTouchEnd"
+  ></canvas>
+
+  <view class="top-hud">
+    <view class="brand">
+      <view class="brand-mark"></view>
+      <view>
+        <text class="title">星尘快递</text>
+        <text class="objective">{{objective}}</text>
+        <view wx:if="{{mode === 'playing' && remaining > 0}}" class="need-badge">
+          <text>还需</text>
+          <text class="need-number">{{remaining}}</text>
+          <text>星尘</text>
+        </view>
+      </view>
+    </view>
+    <view class="stats">
+      <view><text>{{score}}</text><text>分数</text></view>
+      <view><text>{{wave}}</text><text>航段</text></view>
+      <view class="{{remaining === 0 && mode === 'playing' ? 'cargo full' : 'cargo'}}"><text>{{cargo}}/{{quota}}</text><text>货舱</text></view>
+    </view>
+  </view>
+
+  <view class="bottom-hud">
+    <view class="meter-row">
+      <text>能量</text>
+      <view class="meter"><view style="width: {{energyPercent}}%"></view></view>
+      <text>{{energy}}</text>
+    </view>
+    <view class="meter-row">
+      <text>护盾</text>
+      <view class="meter shield"><view style="width: {{shieldPercent}}%"></view></view>
+      <text>{{shield}}</text>
+    </view>
+    <view class="upgrade-row">
+      <view class="upgrade-head">
+        <text>改装阶数</text>
+        <text>{{upgradeTotal}}/{{upgradeMax}}</text>
+      </view>
+      <view class="chips">
+        <text wx:for="{{upgradeChips}}" wx:key="id" class="{{item.level > 0 ? 'chip on' : 'chip'}}">{{item.short}} Lv.{{item.level}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{mode === 'ready'}}" class="overlay">
+    <view class="dialog">
+      <text class="eyebrow">MINI PROGRAM</text>
+      <text class="heading">星尘快递</text>
+      <text class="copy">左侧拖动飞行，右侧按住推进。连击会召唤奇星，撞石会引来红警和地雷。</text>
+      <button class="primary" bindtap="startRun">开始航段</button>
+    </view>
+  </view>
+
+  <view wx:if="{{mode === 'upgrade'}}" class="overlay">
+    <view class="dialog">
+      <text class="eyebrow">DOCKING</text>
+      <text class="heading small">停靠改装</text>
+      <text class="copy">交付完成，选择一项改装进入下一航段。</text>
+      <button wx:for="{{upgradeChoices}}" wx:key="id" class="upgrade-button" data-id="{{item.id}}" bindtap="chooseUpgrade">
+        {{item.title}} Lv.{{item.nextLevel}}
+      </button>
+    </view>
+  </view>
+
+  <view wx:if="{{mode === 'over'}}" class="overlay">
+    <view class="dialog">
+      <text class="eyebrow">RUN COMPLETE</text>
+      <text class="heading">航线中断</text>
+      <text class="copy">完成 {{delivered}} 份星尘交付，抵达第 {{wave}} 段航线，得分 {{score}}。</text>
+      <button class="primary" bindtap="startRun">重新出发</button>
+    </view>
+  </view>
+
+  <view class="boost-pad">⚡</view>
+</view>

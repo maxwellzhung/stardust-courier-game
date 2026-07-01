@@ -1,0 +1,20 @@
+{
+  "name": "星尘快递",
+  "short_name": "星尘快递",
+  "description": "驾驶快递飞船穿过碎片航道，采集星尘并完成交付。",
+  "lang": "zh-CN",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#061019",
+  "theme_color": "#061019",
+  "icons": [
+    {
+      "src": "assets/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

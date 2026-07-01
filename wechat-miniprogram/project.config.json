@@ -1,0 +1,12 @@
+{
+  "appid": "touristappid",
+  "compileType": "miniprogram",
+  "libVersion": "latest",
+  "projectname": "星尘快递",
+  "setting": {
+    "es6": true,
+    "enhance": true,
+    "minified": true,
+    "postcss": true
+  }
+}

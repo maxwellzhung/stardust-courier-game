@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#061019">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="星尘快递">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>星尘快递</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="assets/app-icon.svg">
+    <link rel="preload" href="assets/starfield-background.png" as="image">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="game-shell" aria-label="星尘快递游戏原型">
+      <canvas id="game" width="1280" height="720"></canvas>
+
+      <header class="top-hud" aria-live="polite">
+        <div class="brand-lockup">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div class="brand-copy">
+            <strong>星尘快递</strong>
+            <span id="objective">待命</span>
+            <span id="remainingBadge" class="remaining-badge" hidden>
+              <small>还需</small>
+              <b id="remainingCount">3</b>
+              <em>星尘</em>
+            </span>
+          </div>
+        </div>
+
+        <div class="stat-strip">
+          <span><b id="score">0</b><small>分数</small></span>
+          <span><b id="wave">1</b><small>航段</small></span>
+          <span class="cargo-stat"><b id="cargo">0/3</b><small>货舱</small></span>
+        </div>
+      </header>
+
+      <aside class="telemetry" aria-label="飞船状态">
+        <div class="meter-row">
+          <span>能量</span>
+          <div class="meter"><i id="energyBar"></i></div>
+          <b id="energyValue">100</b>
+        </div>
+        <div class="meter-row">
+          <span>护盾</span>
+          <div class="meter shield"><i id="shieldBar"></i></div>
+          <b id="shieldValue">100</b>
+        </div>
+        <div class="upgrade-rack" aria-label="改装阶数">
+          <div class="upgrade-rack-head">
+            <span>改装阶数</span>
+            <b id="upgradeTotal">0/17</b>
+          </div>
+          <div class="upgrade-chips">
+            <span class="upgrade-chip" data-upgrade-tier="engine"><em>推</em><b id="engineTier">Lv.0</b></span>
+            <span class="upgrade-chip" data-upgrade-tier="shield"><em>盾</em><b id="shieldTier">Lv.0</b></span>
+            <span class="upgrade-chip" data-upgrade-tier="magnet"><em>磁</em><b id="magnetTier">Lv.0</b></span>
+            <span class="upgrade-chip" data-upgrade-tier="reactor"><em>能</em><b id="reactorTier">Lv.0</b></span>
+            <span class="upgrade-chip" data-upgrade-tier="cargo"><em>舱</em><b id="cargoTier">Lv.0</b></span>
+          </div>
+        </div>
+      </aside>
+
+      <button id="pauseButton" class="pause-button" type="button" aria-label="暂停" title="暂停">
+        <span aria-hidden="true"></span>
+      </button>
+
+      <section id="startOverlay" class="overlay">
+        <div class="dialog">
+          <p class="eyebrow">Browser prototype</p>
+          <h1>星尘快递</h1>
+          <p>穿过碎片航道，装满星尘货舱，再把它送回右下角的轨道港。每次交付都会打开更危险的一段航线。</p>
+          <button id="startButton" class="primary-button" type="button">开始航段</button>
+          <div class="leaderboard compact-board">
+            <div class="board-head">
+              <strong>本地排行榜</strong>
+              <span>Top 10</span>
+            </div>
+            <ol id="startLeaderboardList" class="rank-list"></ol>
+          </div>
+        </div>
+      </section>
+
+      <section id="gameOverOverlay" class="overlay hidden">
+        <div class="dialog results-dialog">
+          <p class="eyebrow">Run complete</p>
+          <h2>航线中断</h2>
+          <p id="runSummary">本次没有完成交付。</p>
+          <form id="rankForm" class="rank-form" autocomplete="off">
+            <label for="playerName">昵称</label>
+            <div>
+              <input id="playerName" name="playerName" type="text" maxlength="12" placeholder="输入昵称" required>
+              <button id="saveRankButton" class="primary-button" type="submit">保存成绩</button>
+            </div>
+            <small id="rankMessage">成绩只保存在当前浏览器。</small>
+          </form>
+          <div class="leaderboard">
+            <div class="board-head">
+              <strong>本地排行榜</strong>
+              <button id="clearRankButton" type="button">清空</button>
+            </div>
+            <ol id="leaderboardList" class="rank-list"></ol>
+          </div>
+          <button id="restartButton" class="primary-button" type="button">重新出发</button>
+        </div>
+      </section>
+
+      <section id="upgradeOverlay" class="overlay hidden">
+        <div class="dialog upgrade-dialog">
+          <p class="eyebrow">Docking bay</p>
+          <h2>停靠改装</h2>
+          <p id="upgradeSummary">交付完成，选择一项改装后继续下一段航线。</p>
+          <div id="upgradeChoices" class="upgrade-grid" aria-label="可选改装"></div>
+        </div>
+      </section>
+
+      <div class="touch-controls" aria-hidden="true">
+        <div id="stickZone" class="stick-zone">
+          <span id="stickKnob"></span>
+        </div>
+        <button id="boostButton" class="boost-button" type="button" aria-label="推进">⚡</button>
+      </div>
+    </main>
+
+    <script src="game.js"></script>
+    <script src="pwa.js"></script>
+  </body>
+</html>

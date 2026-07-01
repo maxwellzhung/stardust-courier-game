@@ -1,0 +1,13 @@
+{
+  "pages": [
+    "pages/game/game"
+  ],
+  "window": {
+    "navigationBarTitleText": "星尘快递",
+    "navigationBarBackgroundColor": "#061019",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#061019"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}
