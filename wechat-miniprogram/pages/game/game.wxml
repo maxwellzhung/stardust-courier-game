@@ -55,7 +55,7 @@
     <view class="dialog">
       <text class="eyebrow">MINI PROGRAM</text>
       <text class="heading">星尘快递</text>
-      <text class="copy">左侧拖动飞行，右侧按住推进。连击会召唤奇星，撞石会引来红警和地雷。</text>
+      <text class="copy">左右两个方向摇杆都能操控飞船。连击会召唤奇星，撞石会引来红警和地雷。</text>
       <button class="primary" bindtap="startRun">开始航段</button>
     </view>
   </view>
@@ -80,5 +80,6 @@
     </view>
   </view>
 
-  <view class="boost-pad">⚡</view>
+  <view class="stick-pad stick-pad-left"><view></view></view>
+  <view class="stick-pad stick-pad-right"><view></view></view>
 </view>

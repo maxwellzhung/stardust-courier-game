@@ -109,13 +109,16 @@
     upgradeChoices: document.getElementById("upgradeChoices"),
     stickZone: document.getElementById("stickZone"),
     stickKnob: document.getElementById("stickKnob"),
-    boostButton: document.getElementById("boostButton"),
+    rightStickZone: document.getElementById("rightStickZone"),
+    rightStickKnob: document.getElementById("rightStickKnob"),
   };
 
   const input = {
     keys: new Set(),
-    touchAxis: { x: 0, y: 0 },
-    touchBoost: false,
+    touchAxes: {
+      left: { x: 0, y: 0 },
+      right: { x: 0, y: 0 },
+    },
   };
 
   const audio = {
@@ -135,7 +138,10 @@
 
   let state = createState();
   let lastTime = 0;
-  let stickPointer = null;
+  const stickPointers = {
+    left: null,
+    right: null,
+  };
 
   function createState() {
     return {
@@ -1228,8 +1234,8 @@
     if (input.keys.has("ArrowUp") || input.keys.has("KeyW")) y -= 1;
     if (input.keys.has("ArrowDown") || input.keys.has("KeyS")) y += 1;
 
-    x += input.touchAxis.x;
-    y += input.touchAxis.y;
+    x += input.touchAxes.left.x + input.touchAxes.right.x;
+    y += input.touchAxes.left.y + input.touchAxes.right.y;
 
     const length = Math.hypot(x, y);
     if (length > 1) {
@@ -1240,7 +1246,7 @@
   }
 
   function readBoost() {
-    return input.keys.has("Space") || input.touchBoost;
+    return input.keys.has("Space");
   }
 
   function updateHud() {
@@ -2149,15 +2155,15 @@
     updateHud();
   }
 
-  function resetTouchStick() {
-    input.touchAxis.x = 0;
-    input.touchAxis.y = 0;
-    stickPointer = null;
-    dom.stickKnob.style.transform = "translate(-50%, -50%)";
+  function resetTouchStick(side, knob) {
+    input.touchAxes[side].x = 0;
+    input.touchAxes[side].y = 0;
+    stickPointers[side] = null;
+    knob.style.transform = "translate(-50%, -50%)";
   }
 
-  function updateTouchStick(event) {
-    const rect = dom.stickZone.getBoundingClientRect();
+  function updateTouchStick(event, side, zone, knob) {
+    const rect = zone.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
     const max = rect.width * 0.34;
@@ -2170,9 +2176,27 @@
       dy = (dy / length) * max;
     }
 
-    input.touchAxis.x = dx / max;
-    input.touchAxis.y = dy / max;
-    dom.stickKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+    input.touchAxes[side].x = dx / max;
+    input.touchAxes[side].y = dy / max;
+    knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+  }
+
+  function setupTouchStick(side, zone, knob) {
+    zone.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      stickPointers[side] = event.pointerId;
+      zone.setPointerCapture(event.pointerId);
+      updateTouchStick(event, side, zone, knob);
+    });
+
+    zone.addEventListener("pointermove", (event) => {
+      if (event.pointerId === stickPointers[side]) {
+        updateTouchStick(event, side, zone, knob);
+      }
+    });
+
+    zone.addEventListener("pointerup", () => resetTouchStick(side, knob));
+    zone.addEventListener("pointercancel", () => resetTouchStick(side, knob));
   }
 
   function setupEvents() {
@@ -2245,34 +2269,8 @@
       }
     });
 
-    dom.stickZone.addEventListener("pointerdown", (event) => {
-      stickPointer = event.pointerId;
-      dom.stickZone.setPointerCapture(stickPointer);
-      updateTouchStick(event);
-    });
-
-    dom.stickZone.addEventListener("pointermove", (event) => {
-      if (event.pointerId === stickPointer) {
-        updateTouchStick(event);
-      }
-    });
-
-    dom.stickZone.addEventListener("pointerup", resetTouchStick);
-    dom.stickZone.addEventListener("pointercancel", resetTouchStick);
-
-    dom.boostButton.addEventListener("pointerdown", (event) => {
-      event.preventDefault();
-      input.touchBoost = true;
-      dom.boostButton.setPointerCapture(event.pointerId);
-    });
-
-    dom.boostButton.addEventListener("pointerup", () => {
-      input.touchBoost = false;
-    });
-
-    dom.boostButton.addEventListener("pointercancel", () => {
-      input.touchBoost = false;
-    });
+    setupTouchStick("left", dom.stickZone, dom.stickKnob);
+    setupTouchStick("right", dom.rightStickZone, dom.rightStickKnob);
   }
 
   function isTextInput(target) {

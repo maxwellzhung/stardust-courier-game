@@ -15,7 +15,7 @@
 .top-hud,
 .bottom-hud,
 .overlay,
-.boost-pad {
+.stick-pad {
   position: absolute;
   z-index: 5;
 }
@@ -209,20 +209,43 @@
   background: linear-gradient(135deg, #7cf59b, #46e6ff);
 }
 
-.boost-pad {
-  right: 40rpx;
+.stick-pad {
   bottom: 46rpx;
+  right: 40rpx;
   display: grid;
   place-items: center;
   width: 132rpx;
   height: 132rpx;
-  border: 1px solid rgba(255, 185, 79, 0.72);
+  border: 1px solid rgba(159, 217, 234, 0.36);
   border-radius: 50%;
-  color: #07111a;
-  background: linear-gradient(135deg, #ffb94f, #fff083);
-  box-shadow: 0 0 34rpx rgba(255, 185, 79, 0.34);
-  font-size: 54rpx;
+  background: rgba(7, 18, 28, 0.38);
+  box-shadow: 0 0 30rpx rgba(70, 230, 255, 0.14);
   pointer-events: none;
+}
+
+.stick-pad view {
+  width: 54rpx;
+  height: 54rpx;
+  border: 1px solid rgba(70, 230, 255, 0.58);
+  border-radius: 50%;
+  background: rgba(70, 230, 255, 0.16);
+  box-shadow: 0 0 24rpx rgba(70, 230, 255, 0.24);
+}
+
+.stick-pad-left {
+  left: 40rpx;
+  right: auto;
+}
+
+.stick-pad-right {
+  border-color: rgba(255, 185, 79, 0.42);
+  background: rgba(24, 18, 7, 0.34);
+}
+
+.stick-pad-right view {
+  border-color: rgba(255, 185, 79, 0.62);
+  background: rgba(255, 185, 79, 0.16);
+  box-shadow: 0 0 24rpx rgba(255, 185, 79, 0.22);
 }
 
 .overlay {

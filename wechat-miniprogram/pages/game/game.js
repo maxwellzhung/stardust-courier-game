@@ -5,11 +5,8 @@ const MAX_DT = 1 / 30;
 
 const TUNE = {
   accel: 650,
-  boostAccel: 930,
   maxSpeed: 282,
-  boostSpeed: 428,
   drag: 0.955,
-  boostDrain: 14,
   baseDrain: 1.65,
   energyDrainMultiplier: 1.8,
   hitGrace: 0.65,
@@ -81,7 +78,13 @@ Page({
 
   onReady() {
     this.state = createState();
-    this.input = { axis: { x: 0, y: 0 }, boost: false, stickId: null, boostId: null, origin: null };
+    this.input = {
+      axis: { x: 0, y: 0 },
+      sticks: {
+        left: { axis: { x: 0, y: 0 }, id: null, origin: null },
+        right: { axis: { x: 0, y: 0 }, id: null, origin: null },
+      },
+    };
     this.stars = Array.from({ length: 90 }, () => ({
       x: random(0, WORLD.width),
       y: random(0, WORLD.height),
@@ -207,10 +210,9 @@ Page({
     const s = this.state;
     const p = s.player;
     const moving = Math.hypot(this.input.axis.x, this.input.axis.y) > 0.05;
-    const wantsBoost = moving && this.input.boost && s.energy > 4;
     const engine = 1 + s.upgrades.engine * 0.08;
-    const accel = (wantsBoost ? TUNE.boostAccel : TUNE.accel) * engine;
-    const maxSpeed = (wantsBoost ? TUNE.boostSpeed : TUNE.maxSpeed) * engine;
+    const accel = TUNE.accel * engine;
+    const maxSpeed = TUNE.maxSpeed * engine;
     p.vx += this.input.axis.x * accel * dt;
     p.vy += this.input.axis.y * accel * dt;
     const speed = Math.hypot(p.vx, p.vy);
@@ -223,15 +225,14 @@ Page({
     p.x = clamp(p.x + p.vx * dt, p.r, WORLD.width - p.r);
     p.y = clamp(p.y + p.vy * dt, p.r, WORLD.height - p.r);
     if (Math.hypot(p.vx, p.vy) > 14) p.angle = Math.atan2(p.vy, p.vx);
-    const boostDrain = TUNE.boostDrain * Math.max(0.72, 1 - s.upgrades.engine * 0.07);
-    s.energy -= (TUNE.baseDrain + (wantsBoost ? boostDrain : 0)) * TUNE.energyDrainMultiplier * dt;
+    s.energy -= TUNE.baseDrain * TUNE.energyDrainMultiplier * dt;
     if (dist(p.x, p.y, DEPOT.x, DEPOT.y) < DEPOT.r + 18 && s.cargo === 0) {
       s.energy = Math.min(this.maxEnergy(), s.energy + (10 + s.upgrades.reactor * 1.5) * dt);
     }
     p.hitGrace = Math.max(0, p.hitGrace - dt);
     if (moving && s.time % 0.05 < dt) {
       const back = p.angle + Math.PI;
-      this.addParticle(p.x + Math.cos(back) * 18, p.y + Math.sin(back) * 18, "#46e6ff", wantsBoost ? 5 : 3);
+      this.addParticle(p.x + Math.cos(back) * 18, p.y + Math.sin(back) * 18, "#46e6ff", 3);
     }
   },
 
@@ -777,26 +778,41 @@ Page({
     const list = Array.from(touches || []);
     const left = list.find((touch) => touch.x < this.view.width * 0.55);
     const right = list.find((touch) => touch.x >= this.view.width * 0.55);
-    if (left) {
-      if (!this.input.origin || this.input.stickId !== left.identifier) {
-        this.input.origin = { x: left.x, y: left.y };
-        this.input.stickId = left.identifier;
+    const nextAxis = { x: 0, y: 0 };
+
+    const updateStick = (side, touch) => {
+      const stick = this.input.sticks[side];
+      if (!touch) {
+        stick.axis = { x: 0, y: 0 };
+        stick.origin = null;
+        stick.id = null;
+        return;
       }
-      const dx = left.x - this.input.origin.x;
-      const dy = left.y - this.input.origin.y;
+
+      if (!stick.origin || stick.id !== touch.identifier) {
+        stick.origin = { x: touch.x, y: touch.y };
+        stick.id = touch.identifier;
+      }
+
+      const dx = touch.x - stick.origin.x;
+      const dy = touch.y - stick.origin.y;
       const len = Math.max(1, Math.hypot(dx, dy));
       const max = 56;
-      this.input.axis = { x: clamp(dx / max, -1, 1), y: clamp(dy / max, -1, 1) };
+      stick.axis = { x: clamp(dx / max, -1, 1), y: clamp(dy / max, -1, 1) };
       if (len > max) {
-        this.input.axis.x = dx / len;
-        this.input.axis.y = dy / len;
+        stick.axis.x = dx / len;
+        stick.axis.y = dy / len;
       }
-    } else {
-      this.input.axis = { x: 0, y: 0 };
-      this.input.origin = null;
-      this.input.stickId = null;
-    }
-    this.input.boost = Boolean(right);
+
+      nextAxis.x += stick.axis.x;
+      nextAxis.y += stick.axis.y;
+    };
+
+    updateStick("left", left);
+    updateStick("right", right);
+
+    const len = Math.hypot(nextAxis.x, nextAxis.y);
+    this.input.axis = len > 1 ? { x: nextAxis.x / len, y: nextAxis.y / len } : nextAxis;
   },
 });
 
