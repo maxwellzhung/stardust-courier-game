@@ -82,6 +82,11 @@
     shieldBar: document.getElementById("shieldBar"),
     energyValue: document.getElementById("energyValue"),
     shieldValue: document.getElementById("shieldValue"),
+    comboMeter: document.getElementById("comboMeter"),
+    comboCount: document.getElementById("comboCount"),
+    comboMultiplier: document.getElementById("comboMultiplier"),
+    comboTimerBar: document.getElementById("comboTimerBar"),
+    comboHint: document.getElementById("comboHint"),
     upgradeTotal: document.getElementById("upgradeTotal"),
     upgradeTiers: {
       engine: document.getElementById("engineTier"),
@@ -714,7 +719,7 @@
 
   function bumpCombo(x = state.player.x, y = state.player.y, allowPrize = true) {
     state.combo += 1;
-    state.comboTimer = Math.max(3.2, 4.8 - state.combo * 0.08);
+    state.comboTimer = comboWindow();
     if (allowPrize) {
       maybeSpawnComboPrize(x, y);
     }
@@ -852,6 +857,10 @@
 
   function comboMultiplier() {
     return 1 + Math.min(1.5, Math.max(0, state.combo - 1) * 0.12);
+  }
+
+  function comboWindow(combo = state.combo) {
+    return Math.max(3.2, 4.8 - combo * 0.08);
   }
 
   function addScore(base, x, y, color, label) {
@@ -1267,6 +1276,7 @@
     dom.energyBar.style.transform = `scaleX(${energy / maxEnergy()})`;
     dom.shieldBar.style.transform = `scaleX(${shield / maxShield()})`;
     updateUpgradeReadout();
+    updateComboReadout();
 
     let objectiveText = "待命";
     if (state.mode === "paused") {
@@ -1284,6 +1294,26 @@
     const status = state.mode === "playing" ? contractStatus() : "";
     const combo = state.mode === "playing" && state.combo >= 2 ? ` · ${state.combo}连击` : "";
     dom.objective.textContent = `${objectiveText}${status ? ` · ${status}` : ""}${combo}`;
+  }
+
+  function updateComboReadout() {
+    if (!dom.comboMeter) {
+      return;
+    }
+
+    const active = state.mode === "playing" && state.combo >= 2 && state.comboTimer > 0;
+    dom.comboMeter.hidden = !active;
+    if (!active) {
+      return;
+    }
+
+    const progress = clamp(state.comboTimer / comboWindow(), 0, 1);
+    const untilPrize = Math.max(0, state.nextComboPrizeAt - state.combo);
+    dom.comboCount.textContent = state.combo.toString();
+    dom.comboMultiplier.textContent = `x${comboMultiplier().toFixed(1)}`;
+    dom.comboTimerBar.style.transform = `scaleX(${progress})`;
+    dom.comboHint.textContent = untilPrize > 0 ? `奇星还差 ${untilPrize}` : "奇星临界";
+    dom.comboMeter.classList.toggle("is-hot", untilPrize <= 1 || state.combo >= 6);
   }
 
   function updateUpgradeReadout() {

@@ -1,4 +1,4 @@
-const CACHE_NAME = "star-courier-v6";
+const CACHE_NAME = "star-courier-v7";
 const APP_SHELL = [
   "./",
   "./index.html",
