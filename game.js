@@ -14,7 +14,7 @@
     drag: 0.955,
     boostDrain: 14,
     baseDrain: 1.65,
-    energyDrainMultiplier: 1.2,
+    energyDrainMultiplier: 1.8,
     hitGrace: 0.65,
   };
 
@@ -325,9 +325,10 @@
     view.mode = view.width < 700 && view.height > view.width * 1.15 ? "portrait" : "fit";
 
     if (view.mode === "portrait") {
-      view.scale = view.width / 720;
+      const edgePadding = view.width < 560 ? 16 : 24;
+      view.scale = Math.max(view.width / WORLD.height, (view.height - edgePadding * 2) / WORLD.height);
       view.ox = 0;
-      view.oy = Math.max(132, (view.height - WORLD.height * view.scale) * 0.48);
+      view.oy = (view.height - WORLD.height * view.scale) / 2;
     } else {
       view.scale = Math.min(view.width / WORLD.width, view.height / WORLD.height);
       view.ox = (view.width - WORLD.width * view.scale) / 2;

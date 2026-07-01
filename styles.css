@@ -24,10 +24,14 @@ body {
   margin: 0;
   overflow: hidden;
   background: #061019;
+  overscroll-behavior: none;
 }
 
 body {
   color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 button {
@@ -38,6 +42,7 @@ button {
   position: relative;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   min-height: 560px;
   overflow: hidden;
   isolation: isolate;
@@ -537,6 +542,9 @@ button {
 
 .dialog {
   width: min(520px, calc(100vw - 36px));
+  max-height: calc(100svh - 32px);
+  overflow: auto;
+  overscroll-behavior: contain;
   padding: clamp(24px, 5vw, 42px);
   border: 1px solid rgba(159, 217, 234, 0.26);
   border-radius: 8px;
@@ -846,85 +854,162 @@ h2 {
 
 @media (pointer: coarse), (max-width: 780px) {
   .game-shell {
+    height: 100svh;
     min-height: 100svh;
   }
 
   .touch-controls {
     display: flex;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    padding: 0 18px;
   }
 
   .top-hud {
     align-items: stretch;
-    gap: 10px;
+    gap: 8px;
+    top: max(12px, env(safe-area-inset-top));
+    left: max(12px, env(safe-area-inset-left));
+    right: calc(max(12px, env(safe-area-inset-right)) + 52px);
   }
 
   .brand-lockup {
     max-width: none;
-    min-height: 58px;
+    min-height: 50px;
     flex: 1 1 48%;
-    padding: 9px 10px;
+    gap: 8px;
+    padding: 7px 9px;
   }
 
   .brand-mark {
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .brand-mark::before {
+    inset: 6px;
+  }
+
+  .brand-mark::after {
+    inset: 12px;
   }
 
   .brand-lockup strong {
-    font-size: 0.88rem;
+    margin-bottom: 1px;
+    font-size: 0.82rem;
   }
 
   .brand-lockup span:not(.brand-mark) {
-    font-size: 0.72rem;
+    font-size: 0.64rem;
   }
 
   .remaining-badge {
-    min-height: 24px;
-    padding: 3px 8px;
+    min-height: 22px;
+    padding: 2px 7px;
   }
 
   .remaining-badge b {
-    font-size: 1.02rem;
+    font-size: 0.92rem;
   }
 
   .stat-strip {
     grid-template-columns: repeat(3, minmax(54px, 1fr));
-    min-height: 58px;
+    min-height: 46px;
     flex: 1 1 48%;
   }
 
   .stat-strip span {
-    padding: 7px 8px;
+    gap: 2px;
+    padding: 6px 7px;
   }
 
   .stat-strip b {
-    font-size: 0.9rem;
+    font-size: 0.78rem;
   }
 
   .cargo-stat b {
-    font-size: 1.04rem;
+    font-size: 0.96rem;
   }
 
   .stat-strip small {
-    font-size: 0.62rem;
+    font-size: 0.54rem;
   }
 
   .telemetry {
-    left: max(16px, env(safe-area-inset-left));
-    bottom: calc(max(20px, env(safe-area-inset-bottom)) + 132px);
-    width: min(330px, calc(100vw - 32px));
-    padding: 10px;
+    left: max(12px, env(safe-area-inset-left));
+    right: max(12px, env(safe-area-inset-right));
+    bottom: calc(max(14px, env(safe-area-inset-bottom)) + 122px);
+    width: auto;
+    gap: 7px;
+    padding: 8px;
+  }
+
+  .meter-row {
+    grid-template-columns: 44px 1fr 34px;
+    gap: 8px;
+    font-size: 0.68rem;
+  }
+
+  .meter {
+    height: 8px;
+  }
+
+  .upgrade-rack {
+    gap: 6px;
+  }
+
+  .upgrade-rack-head span,
+  .upgrade-rack-head b {
+    font-size: 0.62rem;
+  }
+
+  .upgrade-chips {
+    gap: 4px;
+  }
+
+  .upgrade-chip {
+    min-height: 34px;
+    padding: 4px 2px;
+    border-radius: 7px;
+  }
+
+  .upgrade-chip em {
+    width: 18px;
+    height: 18px;
+    font-size: 0.56rem;
+  }
+
+  .upgrade-chip b {
+    font-size: 0.48rem;
   }
 
   .pause-button {
-    top: calc(max(16px, env(safe-area-inset-top)) + 70px);
+    top: max(14px, env(safe-area-inset-top));
+    right: max(12px, env(safe-area-inset-right));
+    width: 42px;
+    height: 42px;
   }
+
+  .stick-zone {
+    width: 110px;
+    height: 110px;
+  }
+
+  .stick-zone span {
+    width: 48px;
+    height: 48px;
+  }
+
+  .boost-button {
+    width: 74px;
+    height: 74px;
+    font-size: 1.75rem;
+  }
+
 }
 
 @media (max-width: 560px) {
   .top-hud {
     flex-direction: column;
-    right: calc(max(16px, env(safe-area-inset-right)) + 52px);
   }
 
   .brand-lockup,
@@ -933,19 +1018,18 @@ h2 {
   }
 
   .telemetry {
-    bottom: calc(max(18px, env(safe-area-inset-bottom)) + 118px);
-    width: min(300px, calc(100vw - 32px));
+    bottom: calc(max(14px, env(safe-area-inset-bottom)) + 120px);
   }
 
   .stick-zone {
-    width: 112px;
-    height: 112px;
+    width: 106px;
+    height: 106px;
   }
 
   .boost-button {
-    width: 70px;
-    height: 70px;
-    font-size: 1.7rem;
+    width: 72px;
+    height: 72px;
+    font-size: 1.65rem;
   }
 
   .rank-form div {

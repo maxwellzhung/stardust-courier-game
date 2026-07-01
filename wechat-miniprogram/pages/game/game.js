@@ -11,7 +11,7 @@ const TUNE = {
   drag: 0.955,
   boostDrain: 14,
   baseDrain: 1.65,
-  energyDrainMultiplier: 1.2,
+  energyDrainMultiplier: 1.8,
   hitGrace: 0.65,
 };
 
@@ -691,11 +691,12 @@ Page({
   },
 
   worldTransform() {
-    const scale = this.view.width / 720;
+    const edgePadding = this.view.width < 560 ? 16 : 24;
+    const scale = Math.max(this.view.width / WORLD.height, (this.view.height - edgePadding * 2) / WORLD.height);
     const visibleWidth = this.view.width / scale;
     const playerX = this.state.player.x;
     const cameraX = clamp(playerX, visibleWidth / 2, WORLD.width - visibleWidth / 2);
-    return { scale, ox: this.view.width / 2 - cameraX * scale, oy: Math.max(132, (this.view.height - WORLD.height * scale) * 0.48) };
+    return { scale, ox: this.view.width / 2 - cameraX * scale, oy: (this.view.height - WORLD.height * scale) / 2 };
   },
 
   pickSpawnPoint(margin) {
