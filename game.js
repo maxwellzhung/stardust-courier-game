@@ -16,6 +16,7 @@
     baseDrain: 1.65,
     energyDrainMultiplier: 1.8,
     hitGrace: 0.65,
+    nearMissSpeed: 86,
   };
 
   const SPECIAL_STAR_TYPES = [
@@ -503,12 +504,26 @@
       rock.y += rock.vy * dt;
       rock.angle += rock.spin * dt;
 
-      if (rock.x < -rock.r) rock.x = WORLD.width + rock.r;
-      if (rock.x > WORLD.width + rock.r) rock.x = -rock.r;
-      if (rock.y < -rock.r) rock.y = WORLD.height + rock.r;
-      if (rock.y > WORLD.height + rock.r) rock.y = -rock.r;
+      if (rock.x < -rock.r) {
+        rock.x = WORLD.width + rock.r;
+        rock.nearMissed = false;
+      }
+      if (rock.x > WORLD.width + rock.r) {
+        rock.x = -rock.r;
+        rock.nearMissed = false;
+      }
+      if (rock.y < -rock.r) {
+        rock.y = WORLD.height + rock.r;
+        rock.nearMissed = false;
+      }
+      if (rock.y > WORLD.height + rock.r) {
+        rock.y = -rock.r;
+        rock.nearMissed = false;
+      }
 
-      collideHazard(rock, 12 + state.wave * 0.8, 190, "asteroid");
+      if (!collideHazard(rock, 12 + state.wave * 0.8, 190, "asteroid")) {
+        maybeAwardNearMiss(rock, "asteroid");
+      }
     }
   }
 
@@ -555,7 +570,9 @@
       drone.x = clamp(drone.x, 28, WORLD.width - 28);
       drone.y = clamp(drone.y, 28, WORLD.height - 28);
 
-      collideHazard(drone, alert ? 24 + state.wave * 1.2 : 18 + state.wave, alert ? 285 : 245, "seeker");
+      if (!collideHazard(drone, alert ? 24 + state.wave * 1.2 : 18 + state.wave, alert ? 285 : 245, "seeker")) {
+        maybeAwardNearMiss(drone, alert ? "alert" : "seeker");
+      }
     }
   }
 
@@ -582,10 +599,14 @@
         continue;
       }
 
-      if (mine.armTimer <= 0 && collideHazard(mine, 24 + state.wave * 1.4, 320, "mine")) {
-        state.mines.splice(i, 1);
-        burst(mine.x, mine.y, 34, "#ff3e48", 1.2);
-        floatText(mine.x, mine.y - 34, "地雷爆炸", "#ff6b6b", 0.95);
+      if (mine.armTimer <= 0) {
+        if (collideHazard(mine, 24 + state.wave * 1.4, 320, "mine")) {
+          state.mines.splice(i, 1);
+          burst(mine.x, mine.y, 34, "#ff3e48", 1.2);
+          floatText(mine.x, mine.y - 34, "地雷爆炸", "#ff6b6b", 0.95);
+        } else {
+          maybeAwardNearMiss(mine, "mine");
+        }
       }
     }
   }
@@ -616,6 +637,46 @@
       triggerCollisionPenalty(hazard);
     }
     return true;
+  }
+
+  function maybeAwardNearMiss(hazard, source) {
+    const p = state.player;
+    if (hazard.nearMissed || p.hitGrace > 0) {
+      return false;
+    }
+
+    const hitRadius = p.r + hazard.r;
+    const d = dist(p.x, p.y, hazard.x, hazard.y);
+    if (d <= hitRadius || d > hitRadius + nearMissRange(source)) {
+      return false;
+    }
+
+    const relativeSpeed = Math.hypot(p.vx - (hazard.vx || 0), p.vy - (hazard.vy || 0));
+    if (relativeSpeed < TUNE.nearMissSpeed) {
+      return false;
+    }
+
+    hazard.nearMissed = true;
+    bumpCombo(p.x, p.y, true);
+    addScore(nearMissScore(source), p.x, p.y, "#ffdf8a", "擦肩");
+    playCue("dodge");
+    floatText(p.x, p.y - 46, "擦肩闪避", "#ffdf8a", 0.75);
+    burst(p.x, p.y, 8, "#ffdf8a", 0.45);
+    return true;
+  }
+
+  function nearMissRange(source) {
+    if (source === "mine") return 18;
+    if (source === "alert") return 24;
+    if (source === "seeker") return 22;
+    return 20;
+  }
+
+  function nearMissScore(source) {
+    if (source === "mine") return 34 + state.wave * 5;
+    if (source === "alert") return 32 + state.wave * 5;
+    if (source === "seeker") return 24 + state.wave * 4;
+    return 16 + state.wave * 3;
   }
 
   function checkCollections() {
@@ -2340,6 +2401,7 @@
       upgrade: [[460, 0, 0.08], [690, 0.08, 0.1]],
       bonus: [[880, 0, 0.055], [1180, 0.05, 0.075], [1480, 0.12, 0.065]],
       alarm: [[170, 0, 0.08], [118, 0.08, 0.11]],
+      dodge: [[960, 0, 0.045], [1280, 0.045, 0.055]],
     };
 
     for (const [frequency, offset, duration] of patterns[name] || []) {
